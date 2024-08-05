@@ -1,0 +1,52 @@
+version: '3'
+
+services:
+  app:
+    build: .
+    ports:
+      - '3000:3000'
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      - db
+    env_file:
+      - .env
+    networks:
+      - app-network
+
+  cron-server:
+    build: ./cron-server
+    ports:
+      - '3001:3001'
+    volumes:
+      - .:/cron-server
+      - /cron-server/node_modules
+    depends_on:
+      - db
+    env_file:
+      - .env
+    networks:
+      - app-network
+
+  db:
+    container_name: db
+    image: postgres:latest
+    expose:
+      - '5431'
+    command: -p 5431
+    ports:
+      - '5431:5431'
+    env_file:
+      - .env
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+volumes:
+  pgdata: {}
+
+networks:
+  app-network:
+    driver: bridge
